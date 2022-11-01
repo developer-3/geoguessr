@@ -44,7 +44,7 @@ function Game() {
                 onLoad={onLoad}
             />
             { loading ? <p>loading game</p> : 
-                <div>
+                <div className="w-full h-full">
                     {didGuess ? <RoundComplete guess={guess} actual={game?.roundCoordinates[0]} /> : <div className="w-full h-screen flex items-center justify-center relative">
                         <GuessMap guessCallback={guessCallback} />
                         <StreetViewMap location={game?.roundCoordinates[0]} round={0}/>

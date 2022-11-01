@@ -49,7 +49,7 @@ export default function GuessMap(props: GuessMapProps) {
                 { marker ?
                     <button className="border-none bg-green-600 rounded-xl font-bold h-[2rem]" onClick={makeGuess}>Guess</button>
                 :
-                    <button className="border-none bg-green-600 rounded-xl font-bold h-[2rem]" onClick={makeGuess}>Guess</button>
+                    <button className="border-none bg-gray-300 text-gray-600 rounded-xl font-bold h-[2rem]">Place your pin on the map</button>
                 }
             </div>
         </div>
