@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Location } from '../types/types'
 
 interface StreetViewMapProps {
-    location: Location | undefined,
-    round: number
+    location: Location | undefined
 }
 
 export default function StreetViewMap(props: StreetViewMapProps) {

@@ -3,7 +3,8 @@ import { Location } from "../types/types"
 
 interface RoundCompleteProps {
     guess: google.maps.LatLng|null,
-    actual: Location|undefined
+    actual: Location|undefined,
+    nextRoundCallback: Function
 }
 
 export default function RoundComplete(props: RoundCompleteProps) {
@@ -77,13 +78,17 @@ export default function RoundComplete(props: RoundCompleteProps) {
         }
     }, [ref, map])
 
+    function nextRound() {
+        props.nextRoundCallback()
+    }
+
     return (
         <div className="w-full h-full">
             <div ref={ref} className="w-full h-2/3"/>
             <div className="h-1/3 pt-4 flex flex-col gap-4 items-center bg-gradient-to-tr from-sky-900 to-indigo-900">
                 <p className="text-xl font-bold italic text-amber-300">{score.toFixed(0)} points</p>
                 <p className="flex flex-row items-center gap-1 font-medium">Your guess was <Distance distance={distance} /> from the current location</p>
-                <button className="h-[2rem] px-8 mt-2 border-none bg-gradient-to-r from-green-600 to-green-700 rounded-2xl font-bold text-sm hover:scale-110">NEXT ROUND</button>
+                <button className="h-[2rem] px-8 mt-2 border-none bg-gradient-to-r from-green-600 to-green-700 rounded-2xl font-bold text-sm hover:scale-110" onClick={nextRound}>NEXT ROUND</button>
             </div>
         </div>
     )

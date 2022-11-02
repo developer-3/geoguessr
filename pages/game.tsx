@@ -24,18 +24,47 @@ function Game() {
     const [game, setGame] = useState<GameData|null>(null);
     const [didGuess, setDidGuess] = useState(false);
     const [guess, setGuess] = useState<google.maps.LatLng|null>(null)
+    const [currentRound, setCurrentRound] = useState(0);
 
-    const onLoad = (streetViewService: google.maps.StreetViewService | null) => {
-        generateGame(streetViewService).then((res) =>{
-            setGame(res);
-            setLoading(false);
-        });
+    const [streetViewService, setStreetViewService] = useState<google.maps.StreetViewService|null>(null);
+
+    const onLoad = (service: google.maps.StreetViewService | null) => {
+        if (streetViewService != null) {
+            return
+        }
+        setStreetViewService(service);
+        
+        var _game: GameData = {
+            scores: [],
+            roundCoordinates: [],
+            id: 1,
+            numberOfRounds: 5
+        }
+
+        getLocation(service).then((location) => {
+            if (location != null) {
+                _game.roundCoordinates.push(location);
+                setGame(_game);
+                setLoading(false);
+            }
+        })
     };
 
     function guessCallback(guess: google.maps.LatLng) {
         setDidGuess(true);
         setGuess(guess);
         console.log("guess", guess)
+    }
+
+    function nextRound() {
+        setCurrentRound(currentRound + 1);
+        setLoading(true);
+        setDidGuess(false);
+        getLocation(streetViewService).then((location) => {
+            if (location != null)
+                game?.roundCoordinates.push(location);
+                setLoading(false);
+        })
     }
 
     return (
@@ -45,9 +74,9 @@ function Game() {
             />
             { loading ? <p>loading game</p> : 
                 <div className="w-full h-full">
-                    {didGuess ? <RoundComplete guess={guess} actual={game?.roundCoordinates[0]} /> : <div className="w-full h-screen flex items-center justify-center relative">
+                    {didGuess ? <RoundComplete guess={guess} actual={game?.roundCoordinates[currentRound]} nextRoundCallback={nextRound} /> : <div className="w-full h-screen flex items-center justify-center relative">
                         <GuessMap guessCallback={guessCallback} />
-                        <StreetViewMap location={game?.roundCoordinates[0]} round={0}/>
+                        <StreetViewMap location={game?.roundCoordinates[game.roundCoordinates.length-1]} />
                     </div>}
                 </div>
             }
@@ -65,10 +94,6 @@ async function generateGame(service: google.maps.StreetViewService | null) : Pro
     // get 5 panos
     let numRounds = 5;
 
-    await getLocations(service, numRounds).then((locations) => {
-        game.roundCoordinates = locations
-    });
-
     game.numberOfRounds = numRounds;
     game.id = 1;
     game.scores = []
@@ -82,9 +107,13 @@ function getRandomInRange(from: number, to: number, fixed: number) : number {
     return res;
 }
 
-async function getLocations(service: google.maps.StreetViewService, numRounds: number) : Promise<any> {
-    let coords: Location[] = [];
-    while (coords.length < numRounds) {
+async function getLocation(service: google.maps.StreetViewService|null) : Promise<any> {
+    if (service == null) {
+        return null;
+    }
+
+    let loc = null;
+    while (loc == null) {
         let lat: number = getRandomInRange(-180, 180, 3);
         let long: number = getRandomInRange(-180, 180, 3);
         
@@ -113,10 +142,9 @@ async function getLocations(service: google.maps.StreetViewService, numRounds: n
                     lng: data.location.latLng.lng() as unknown as number
                 }
 
-                coords.push(location);
+                loc = location
             }
         })
     }
-    
-    return coords;
+    return loc;
 }
