@@ -79,14 +79,16 @@ export default function RoundComplete(props: RoundCompleteProps) {
     }, [ref, map])
 
     function nextRound() {
-        props.nextRoundCallback()
+        props.nextRoundCallback(score)
     }
 
     return (
         <div className="w-full h-full">
             <div ref={ref} className="w-full h-2/3"/>
             <div className="h-1/3 pt-4 flex flex-col gap-4 items-center bg-gradient-to-tr from-sky-900 to-indigo-900">
-                <p className="text-xl font-bold italic text-amber-300">{score.toFixed(0)} points</p>
+                <p className="text-xl font-bold italic text-amber-300 animate-fade-in">
+                    {score.toFixed(0)} points
+                </p>
                 <p className="flex flex-row items-center gap-1 font-medium">Your guess was <Distance distance={distance} /> from the current location</p>
                 <button className="h-[2rem] px-8 mt-2 border-none bg-gradient-to-r from-green-600 to-green-700 rounded-2xl font-bold text-sm hover:scale-110" onClick={nextRound}>NEXT ROUND</button>
             </div>
@@ -109,7 +111,7 @@ function calculateScore(guess: google.maps.LatLng|null, actual: Location|undefin
         return [0,0]
     }
     let distance = getDistanceFromLatLonInKm(guess.lat(), guess?.lng(), actual.lat, actual.lng);
-    let score = 5000*Math.pow(0.998036, distance)
+    let score = 5000*Math.pow(0.99946, distance)
     return [score, distance];
 }
 

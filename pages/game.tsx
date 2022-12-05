@@ -4,6 +4,7 @@ import { GameData, Location } from '../types/types'
 import GuessMap from "../components/GuessMap";
 import StreetViewMap from "../components/StreetViewMap";
 import RoundComplete from "../components/RoundComplete";
+import { useRouter } from "next/router";
 
 export default function GameWrapper() {
 
@@ -27,6 +28,8 @@ function Game() {
     const [currentRound, setCurrentRound] = useState(0);
 
     const [streetViewService, setStreetViewService] = useState<google.maps.StreetViewService|null>(null);
+
+    const router = useRouter();
 
     const onLoad = (service: google.maps.StreetViewService | null) => {
         if (streetViewService != null) {
@@ -56,7 +59,13 @@ function Game() {
         console.log("guess", guess)
     }
 
-    function nextRound() {
+    function nextRound(score: number) {
+        game?.scores.push(score);
+        if (currentRound + 1 >= game!.numberOfRounds) {
+            localStorage.setItem('game_results', JSON.stringify(game));
+            router.push('/results')
+            return;
+        }
         setCurrentRound(currentRound + 1);
         setLoading(true);
         setDidGuess(false);
@@ -72,7 +81,7 @@ function Game() {
             <StreetViewService
                 onLoad={onLoad}
             />
-            { loading ? <p>loading game</p> : 
+            { loading ? <div className="w-full h-full flex items-center justify-center"><p>loading game</p></div> : 
                 <div className="w-full h-full">
                     {didGuess ? <RoundComplete guess={guess} actual={game?.roundCoordinates[currentRound]} nextRoundCallback={nextRound} /> : <div className="w-full h-screen flex items-center justify-center relative">
                         <GuessMap guessCallback={guessCallback} />
